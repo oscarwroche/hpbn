@@ -1,0 +1,93 @@
+* Handshake
+
+Three way handshake at beginning of any communication via HTTP / TCP :
+can cause delays -> Can be mitigated with *TFO*
+
+* Congestion collapse
+
+Happens when timeout + retry time < round trip
+Several mechanisms to mitigate :
+
+** Flow control
+
+To prevent buffer overflow, each end advertises its remaining buffer space
+This *window* is carried with each ACK packet and allows to adjust the
+data flow rate
+
+** Slow-start
+
+The underlying network can still be overloaded -> its capacity must be estimated
+*congestion window size (cwnd)* variable is used and updated with data exchanges
+-> *slow start* = start with a small cwnd and multiply by 2 every time
+
+Good for long connections (big downloads) but more problematic for shorter-lived
+connections
+
+** Congestion avoidance
+
+Phase after cwnd doubling where window gets reduced to avoid overflow
+Several algos : AIMD / PRR
+
+* Bandwidth-delay product
+
+Window sizes depend on roundtrip times. There is a hard limit on data rate
+based on window sizes (and / or roundtrip time) whatever the bandwidth.
+
+* Head-of-line blocking
+
+First packet in order will block subsequent packets which can block
+buffer, which will release lots of packets later (*jitter*)
+
+Not all apps need to receive packets in order so using something else than
+TCP can be interesting -> audio, video, *WebRTC*
+
+* Summary
+
+TCP three-way handshake introduces a full roundtrip of latency.
+TCP slow-start is applied to every new connection.
+TCP flow and congestion control regulate throughput of all connections.
+TCP throughput is regulated by current congestion window size.
+
+Best practices :
+
+Increasing TCP’s Initial Congestion Window - A larger starting
+congestion window allows TCP to transfer more data in the
+first roundtrip and significantly accelerates the window
+growth.
+
+Slow-Start Restart - Disabling slow-start after idle will
+improve performance of long-lived TCP connections that
+transfer data in periodic bursts.
+
+Window Scaling (RFC 1323) - Enabling window scaling increases
+the maximum receive window size and allows high-latency
+connections to achieve better throughput.
+
+TCP Fast Open - Allows application data to be sent in the
+initial SYN packet in certain situations. TFO is a new
+optimization, which requires support both on client and
+server; investigate if your application can make use of it.
+
+* Performance Checklist
+
+Upgrade server kernel to latest version.
+
+Ensure that cwnd size is set to 10.
+
+Ensure that window scaling is enabled.
+
+Disable slow-start after idle.
+
+Investigate enabling TCP Fast Open.
+
+Eliminate redundant data transfers.
+
+Compress transferred data.
+
+Position servers closer to the user to reduce roundtrip times.
+
+Reuse TCP connections whenever possible.
+
+Investigate "TCP Tuning for HTTP" recommendations.
+
+

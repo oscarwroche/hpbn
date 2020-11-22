@@ -1,0 +1,89 @@
+* Unreliable / User Datagram Protocol
+
+Datagram is the same as packet but often used for unreliable protocols
+such as UDP :
+
+A self-contained, independent entity of data carrying
+sufficient information to be routed from the source to the
+destination nodes without reliance on earlier exchanges
+between the nodes and the transporting network.
+
+Well-known uses include DNS and WebRTC
+
+* Null Protocol Services
+
+IP (Internet Protocol) layer : datagrams, no guarantee of
+delivery - a protocol *above* IP is in charge of ensuring
+delivery
+
+The UDP layer adds source port (optional), destination port,
+length and checksum (optional)
+
+There is :
+
+No guarantee of message delivery
+No guarantee of order of delivery
+No connection state tracking
+No congestion control
+
+Datagrams aren't fragmented like with TCP
+
+* UDP and Network Address Translators
+
+Only 4 billion unique IPs -> Network Address Translator (NAT)
+maps several local IP addresses to one global / public IP address
+
+* Connection-State Timeouts
+
+Problem -> NAT relies on connection state (table) whereas the
+point of UDP is that it doesn't : *when to drop translations* ?
+
+UDP records expire on timer so to keep them alive, **keepalive packets**
+are sent regularly
+
+* NAT Traversal
+
+Problem for inbound connections (when acting as a server) when there is
+no mapping in NAT table.
+Also in this case programs must know their own public IP address so 
+they can tell client where to send records.
+
+* STUN / TURN / ICE
+
+*STUN (Session Traversal Utilities for NAT)* used to know own public
+IP / port
+
+STUN may fail so *TURN (Traversal Using Relays around NAT)* is used instead,
+switching to TCP instead of UDP.
+It uses *relays* - the TURN servers is a middleman of sorts that transmits
+packets between NAT gates - but it is no longer peer to peer !
+So it is only used as a last resort
+
+*Numbers: 92% STUN - 8% TURN*
+
+* Optimizing for UDP
+
+Best practices (RFC 5405):
+
+Application must tolerate a wide range of Internet path conditions.
+
+Application should control rate of transmission.
+
+Application should perform congestion control over all traffic.
+
+Application should use bandwidth similar to TCP.
+
+Application should back off retransmission counters following loss.
+
+Application should not send datagrams that exceed path MTU.
+
+Application should handle datagram loss, duplication, and reordering.
+
+Application should be robust to delivery delays up to 2 minutes.
+
+Application should enable IPv4 UDP checksum, and must enable IPv6 checksum.
+
+Application may use keepalives when needed (minimum interval 15 seconds).
+
+
+See *WebRTC* 
