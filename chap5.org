@@ -1,0 +1,64 @@
+* Ubiquitous connectivity
+
+Several wireless technologies but difference should be
+invisible to end-user.
+
+* Types of wireless networks
+
+1. *PAN (Personal Area Network)*
+   Bluetooth
+2. *LAN (Local Area Network)*
+   WiFi
+3. *MAN (Metropolitan Area Network)*
+   WiMAX
+4. *WAN (Wide Area Network)*
+   LTE, 4G
+
+Different requirements: battery / power source,
+connectivity, latency tolerance ...
+
+* Performance metrics
+
+[[https://hpbn.co/assets/equations/cfa8855d073e50488c96c187112772ea.svg][Channel Capacity is the Maximum Information Rate]]
+
+Constraints : *bandwidth / signal power*
+
+** Bandwidth
+
+Frequency range agreements, /ex/ 2.4/2.5 GHz for WiFi
+Determined by local governments
+*Low-frequency signals* cover more areas / more competition and larger antennas
+*High-frequency signals* don't travel as far -> more sophisticated architecture
+
+[[https://hpbn.co/assets/diagrams/0c1f6cd359e0ec1180aaefdae072335d.svg][ISM 2450.0 +/- .50 MHz]]
+
+** Signal Power
+
+I.e. *SNR (Signal-to-Noise Ratio)* -> level compared to background noise and
+interference.
+
+Other devices generate interference (micro-wave / other WiFi networks)
+Allegory of people talking over each other in crowded room.
+
+Two problems :
+1. Near-far problem (nearer signals drown out far ones)
+2. Cell-breathing
+
+** Modulation
+
+Signal encoding -> depends on SNR and available technology
+
+* Measuring Real-World Wireless Performance
+
+Specs often advertised for ideal conditions unlike real world.
+
+Factors that affect performance:
+
+Amount of distance between receiver and sender
+Amount of background noise in current location
+Amount of interference from users in the same network (intra-cell)
+Amount of interference from users in other, nearby networks (inter-cell)
+Amount of available transmit power, both at receiver and sender
+Amount of processing power and the chosen modulation scheme
+
+Difficult to perform objective measurements

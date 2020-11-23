@@ -1,0 +1,237 @@
+[[https://hpbn.co/transport-layer-security-tls/][LINK TO CHAPTER]]
+
+* Transport Layer Security (TLS)
+
+SSL protocol : authentication and encryption on top of TCP
+
+TLS is the version of SSL that was standardized by the IETF
+DTLS also exists for UDP
+
+* Encryption, Authentication and Integrity
+
+I.e. Obfuscation / Validity Verification and Anti-Forgery
+
+Steps :
+
+1. TLS handshake: exchanging keys and cryptographic algorithms
+2. Authentication with certificate
+3. Integrity with HMAC
+
+* HTTPS
+
+Reliable tunnel to circumvent the use of various proxies with unknown
+behavior in HTTP.
+
+The /Let's Encrypt/ project enables to get free certificates
+
+* TLS Handshake
+
+Occurs right after TCP handshake - lasts two round trips which is bad
+Solutions:
+  - /False Start/ - don't wait for end of handshake to transmit data
+  - /Abbreviated Handshake/ if previous communications exist
+
+See [[https://tools.ietf.org/html/draft-ietf-tls-tls13-28][TLS 1.3 Specification]]
+
+** Secrecy in RSA Handshake
+
+Same public/private key used on both ends -> unsafe
+[[https://en.wikipedia.org/wiki/Diffie%E2%80%93Hellman_key_exchange][Diffie-Hellman key exchange]] solves this
+
+Public-key Cryptography (ECDH) is used in the beginning,
+then Symmetric Cryptography (AES) is used instead
+
+** Application Layer Protocol Negotiation (ALPN)
+
+Well-known protocols are used: 80 (HTTP) / 443 (TLS-HTTPS)
+So 443 is used with additional mechanisms -> ALPN
+It allows to negotiate additional protocols without extra roundtrips.
+
+** Server Name Indication (SNI)
+
+Used to be able to have several sites on same IP address because there
+originally is only one SSL certificate by IP address.
+It allows to specify a hostname during TLS handshake.
+
+* TLS session resumption
+
+How to resume previous connection to avoid full handshake every time ?
+
+** Session identifiers (RFC 5246)
+
+Session parameters are cached by server and the client can send a
+session ID on connection resumption.
+
+This can be a problem for the server as the cache can grow quite
+large. This can be mitigated by sharing connection cache between
+servers.
+
+** Session tickets / stateless resumption
+
+To avoid caching the server can return a session ticket during
+the first handshake, which can be used by the client in subsequent
+connections.
+
+* Chain of Trust / Certificate Authorities
+
+Who to trust ? With authentication protocols, a trustee of a trustee
+becomes a trustee.
+
+Three solutions:
+
+1. Manually specified certificates
+2. Certificate authorities (*CAs*)
+3. Browser / operating systems (trusted authorities)
+
+CAs are responsible for the certificates they issue and should
+be able to revoke them if they're having suspicions
+
+Browsers allow to explore the chain of trust (/click lock next to URL/).
+
+** Certificate Revocation
+
+If private key compromised / authority compromised
+
+*** Certificate Revocation List (CRL) - [[https://tools.ietf.org/pdf/rfc5280.pdf][RFC 5280]]
+
+Self-explanatory - with issues:
+
+1. Can get very long
+2. Can get very long to fetch during handshake
+3. Fetch may fail, which can cause approval by browser
+   without proper certification
+4. Notification of revocation happens on cache expiry
+
+*** Online Certificate Status Protocol (OCSP) - [[https://tools.ietf.org/pdf/rfc2560.pdf][RFC 2560]]
+
+Real-time checks for certificate status. Faster than getting whole cache.
+*But* limitations of service availability, load etc ...
+Request made by *client*
+
+*** OCSP Stapling - [[https://tools.ietf.org/pdf/rfc6066.pdf][RFC 6066]]
+
+Verification performed by *server*, sent with TLS handshake.
+Best solution so far
+
+* TLS Record Protocol
+
+Structure: [[https://hpbn.co/assets/diagrams/4603275cd98c93aeb8c46b1b1afa0ba6.svg][see picture]]
+Note : each /layer/ adds its own header and data is the innermost thing,
+here the TLS record is then passed to the TCP layer
+
+* Optimizing for TLS
+
+** Reduce computational costs
+
+SSL is not that computationally expensive anymore.
+Using TLS Session Resumption is the most effective optimization.
+
+** 1-RTT Handshakes
+
+*1 return trip at most* for TLS negotiation
+Enable forward secrecy for *TLS false start*
+Checkout [[https://istlsfastyet.com/][/Is TLS fast yet?/]]
+
+** Optimize connection reuse
+
+Allow keepalive packets / audit connection timeout
+
+** Leverage early termination
+
+Optimize location of /edge proxy servers/ to be able to terminate
+*SSL* without travelling all the way to the actual server and
+*SSL offload*.
+Good for caching static content as well.
+Use CDNs for this - that use [[https://hpbn.co/transport-layer-security-tls/#uncached-origin-fetch][uncached origin fetches]].
+
+** Configure Session Caching and Stateless Resumption
+
+Send fewer bits as much as possible.
+*Turn on session caching / support, share it and monitor it*
+
+** Enable False Start
+
+Can be done unilaterally on client end theoretically -
+but modern browsers require some specificities, [[https://hpbn.co/transport-layer-security-tls/#deploying-tls-false-start][see more]]
+(mostly ALPN / forward secrecy).
+
+** Optimizing record size
+
+There can be as much as 100 bytes / 6% record size framing overhead on
+each record.
+Should record size be increased then ? Not necessarily: this might
+introduce overhead if a record is dropped, of reordering must be
+performed.
+
+Ideally there should be *one TLS record per packet* for new connections.
+If there is a large congestion window, TLS records can span several
+packets in a streaming fashion.
+
+[[https://hpbn.co/transport-layer-security-tls/#tls-optimizations-at-google][What Google does]]
+
+** Optimize the Certificate Chain
+
+*Missing certificates* in a chain of certificates forces the browser
+to have to fetch them -> slowdown.
+
+*Unnecessary certificates* add unnecessary bytes in the TLS
+handshake.
+
+** Configure OCSP Stapling
+
+Servers should staple OCSP response from CA.
+
+Pay attention to:
+  - Total chain size can overflow initial congestion window
+  - Only single OCSP response allowed so far but
+    multi-stapling is coming
+
+** Enable HSTS (HTTP Strict Transport Security)
+
+Security mechanism to ensure that:
+  1. All requests are sent via HTTPS
+  2. HTTP is not allowed
+  3. HSTS rules are max X days old
+
+A well-tested TLS is necessary to use HSTS, as a browser won't
+be able to use the website at all if TLS handshake fails.
+
+** Enable HPKP (HTTP Public Key Pinning)
+
+Allows to specify which CAs to trust.
+
+** Update site content to HTTPS
+
+Avoid mixed content - fetching stuff via HTTP while advertising HTTPS.
+Use [[https://hpbn.co/csp][Content Security Policy]]
+
+** Performance checklist
+
+Get best performance from TCP; see Optimizing for TCP.
+
+Upgrade TLS libraries to latest release, and (re)build servers against them.
+
+Enable and configure session caching and stateless resumption.
+
+Monitor your session caching hit rates and adjust configuration accordingly.
+
+Configure forward secrecy ciphers to enable TLS False Start.
+
+Terminate TLS sessions closer to the user to minimize roundtrip latencies.
+
+Use dynamic TLS record sizing to optimize latency and throughput.
+
+Audit and optimize the size of your certificate chain.
+
+Configure OCSP stapling.
+
+Configure HSTS and HPKP.
+
+Configure CSP policies.
+
+Enable HTTP/2; see HTTP/2.
+
+** How to test / verify ?
+
+Use [[https://hpbn.co/qualys][Qualys SSL Server Test]]
+Learn how to use /openssl/
