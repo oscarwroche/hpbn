@@ -1,0 +1,62 @@
+* WiFi
+
+Operates in unlicensed ISM, easy to deploy.
+Refers to products based on the IEEE 802.11 standards
+
+* From Ethernet to a Wireless LAN
+
+Ethernet inspired by ALOHANet - University of Hawaii 1970
+Random access channels
+
+Ethernet:
+  1. Check if anybody else is transmitting
+  2. If busy, listen till free
+  3. When free, transmit data
++ Collision detection with exponential backoff
+
+WiFi is essentially the same without collision detection
+which is impossible given the hardware
+
+Works well with channel loads below 10% - to avoid having
+too many collisions
+
+* Wifi standards and features
+
+Several standards identified by letters.
+The /b/ and /g/ standards are the ones used the most.
+Their bandwidth is 20 MHz, both use the unlicensed 2.4 GHz ISM.
+The upcoming /ac/ and /n/ standards double the bandwidth and
+will use multiple radios.
+
+* Measuring and Optimizing WiFi Performance
+
+The fact that WiFi is so widespread is the cause of problems
+because anybody can deploy it without any QoS (Quality of Service)
+policy.
+
+The 2.4 GHz band has three non overlapping 20 MHz channels - so
+in practice clients will often compete.
+
+The new standard will use the larger 5 GHz band.
+
+Use /ping 192.168.1.1/ to see timing of first hop.
+
+* Optimizing for WiFi Networks
+
+** Leverage Unmetered Bandwidth
+
+WAN (Wide area network) bandwidth is often the limiting factor.
+So prompt to use WiFi as much as possible.
+
+** Adapt to variable bandwidth
+
+It's hard to predict bandwidth (for example to adjust streaming
+rate when starting video playback).
+So continuous measurement has to be made : [[https://hpbn.co/wifi/#adaptive-bitrate-streaming][Adaptive Bitrate Streaming]]
+Netflix uses over 120 different bitrates !
+
+** Adapt to variable latency
+
+The behavior of an app may have to be adapted to when WiFi is being used.
+For example WebRTC uses UDP to lower protocol and application-level
+overheads.
