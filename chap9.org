@@ -1,0 +1,50 @@
+* A Brief History of HTTP
+
+Designed with *simplicity* in mind.  Design goals : "file transfer
+functionality, ability to request an index search of a hypertext archive, format
+negotiation, and an ability to refer the client to another server."
+
+* HTTP 0.9
+
+Try : /telnet google.com 80/
+
+Client-server, request-response protocol.
+
+ASCII protocol, running over a TCP/IP link.
+
+Designed to transfer hypertext documents (HTML).
+
+The connection between server and client is closed after every request.
+
+* HTTP/1.0 - RFC 1945
+
+Evolved side-by-side with *browsers*. Designed to overcome the limitations
+of 0.9: need more than Hypertext documents, more metadata, content negotiation.
+
+Innovations :
+
+- Request may consist of multiple newline separated header fields.
+
+- Response object is prefixed with a response status line.
+
+- Response object has its own set of newline separated header fields.
+
+- Response object is not limited to hypertext (it's *hypermedia*)
+
+- The connection between server and client is closed after every request.
+
+* HTTP/1.1 - RFC 2068
+
+Performance optimizations : keepalive connections, chunked encoding transfers,
+byte-range requests, additional caching mechanisms, transfer encodings
+and request pipelining.
+
+Keeps connection open by default.
+
+* HTTP/2 - Improving Transport Performance (started early 2012)
+
+Transparent upgrade to HTTP/2.
+Headers / values / use cases should not change.
+
+
+

@@ -1,0 +1,144 @@
+* Primer on web performance
+
+- Impact of latency and bandwidth on web performance
+
+- Transport protocol (TCP) constraints imposed on HTTP
+
+- Features and shortcomings of the HTTP protocol itself
+
+- Web application trends and performance requirements
+
+- Browser constraints and optimizations
+
+* Hypertext, Web Pages, and Web Applications
+
+Hypertext documents: text + formatting and links
+Web page: Hypertext + media
+Web application: Single web page with interactions
+
+
+*PLT (Page Load Time)* is the primary metric
+but webapps now have a lot of dependencies so more metrics :
+
+- time to first interaction ?
+- engagement / conversion rate
+
+
+See the [[https://hpbn.co/primer-on-web-performance/][browser processing pipeline]] of a modern web app
+Time to render depends a lot on the resolution of a 
+*dependency graph*.
+
+* Anatomy of a Modern Web Application
+
+[[https://httparchive.org/][Very useful site for metrics etc ...]]
+
+Number of requests + transfer size is a growing concern.
+
+** Speed, Performance, and Human Perception
+
+Simply put: mental context switch after 1 second
+So it's important to *provide any kind of visual feedback*
+before that.
+
+** Analyzing the Resource Waterfall
+
+[[https://www.webpagetest.org/][WebPage Test - Resource waterfall]] - *Very useful* to see which
+parts of the waterfall to spend time optimizing
+
+To provide speedups, rendering starts before all the resources
+have been loaded.
+
+/Waterfall view/ allows to view the *client-side* performance
+issues
+
+/Connection view/ allows to view the issues related to communications
+with the server, etc ... with useful metrics, for example the 
+*time to first byte* to analyse roundtrip latency.
+
+* Performance Pillars: Computing, Rendering, Networking
+
+**  More bandwidth doesn't matter much (for web browsing)
+
+See [[https://hpbn.co/primer-on-latency-and-bandwidth/][Chapter 1]]
+
+** Latency as a performance bottleneck
+
+Study by Mike Belsh, one of the creators of the
+[[https://en.wikipedia.org/wiki/SPDY][SPDY protocol]] shows that performance stagnates with
+bandwidth increase (after a given number of MBits/s).
+For example going form 5 to 10 only improves loading time by 5%.
+
+* How to actually measure performance ?
+
+/Synthetic testing/: process with a reproducible / controlled
+measurement environment.
+
+But it's not sufficient: user browsing patterns vary, caching,
+proxies, browsers, hardware too ...
+
+So *RUM (Real User Measurement)* is also necessary in complement.
+
+** *Very useful*: the [[https://developer.mozilla.org/en-US/docs/Web/API/Navigation_timing_API#:~:text=The%20Navigation%20Timing%20API%20provides,much%20more%20accurate%20and%20reliable.][Navigation Timing API]]
+
+Exposes data related to connection times in each browser ->
+makes it easy to *collect data from each user* !
+
+* Browser optimization
+
+Several optimizations are featured by browsers :
+
+** Automatic Optimizations :
+
+*** Document-aware optimization
+
+Parsing pipelines to identify critical network requests
+that must be dispatched the earliest.
+
+*** Speculative optimization
+
+Optimizations based on predicted user behavior.
+
+** Optimizations developers can use :
+
+*** Resource pre-fetching 
+
+HTML/CSS/JS tell network about priority resources.
+
+*** DNS pre-resolve
+
+DNS pres-resolution based on past user behavior.
+
+*** TCP pre-connect
+
+Same for TCP connection opening
+
+*** Page pre-rendering
+
+API to allow pre-rendering of given likely visited pages.
+
+See: [[https://hpbn.co/chrome-networking][High Performance Networking in Google Chrome]]
+
+** Development guidelines :
+
+- Critical resources such  as CSS and JavaScript  should be discoverable
+as early as possible in the document.
+
+- CSS should be delivered as early as possible to unblock rendering and
+JavaScript execution.
+
+- Noncritical JavaScript should be deferred to avoid blocking DOM and
+CSSOM construction.
+
+- The HTML document is parsed incrementally by the parser; hence the
+document should be periodically flushed for best performance.
+
+- Speculative optimization tips can be added to the DOM elements to
+  help the browser, e.g :
+  #+BEGIN_SRC html
+  <link rel="dns-prefetch" href="//hostname_to_resolve.com"> 
+  <link rel="subresource"  href="/javascript/myapp.js"> 
+  <link rel="prefetch"     href="/images/big.jpeg"> 
+  <link rel="prerender"    href="//example.org/next_page.html">
+  #+END_SRC
+
+[[https://hpbn.co/primer-on-web-performance/#optimizing-time-to-first-byte-ttfb-for-google-search][Google Search Example]]
